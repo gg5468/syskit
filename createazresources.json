@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.27.1.19265",
-      "templateHash": "7517353887229428866"
+      "templateHash": "6074813433133912952"
     }
   },
   "parameters": {
@@ -42,7 +42,7 @@
     },
     "runtimeStack": {
       "type": "string",
-      "defaultValue": "PYTHON|3.10"
+      "defaultValue": "Python|3.11"
     }
   },
   "resources": [
@@ -113,6 +113,7 @@
       "properties": {
         "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('appServicePlanName'))]",
         "siteConfig": {
+          "pythonVersion": "3.11",
           "linuxFxVersion": "[parameters('runtimeStack')]"
         }
       },
