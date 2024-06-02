@@ -45,7 +45,7 @@ resource sqlDatabases 'Microsoft.Sql/servers/databases@2023-05-01-preview' = [fo
   }
 }]
 
-resource appServicePlan 'Microsoft.Web/serverfarms@2020-06-01' = {
+resource appServicePlan 'Microsoft.Web/serverfarms@2023-12-01' = {
   name: appServicePlanName
   location: location
   sku: {
