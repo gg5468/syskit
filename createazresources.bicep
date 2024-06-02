@@ -10,7 +10,7 @@ param elasticPoolName string = 'elasticPool1'
 
 param appServicePlanName string = 'appserviceplan1'
 param appName string = 'webappSyskitDomagoj'
-param runtimeStack string = 'PYTHON|3.10'
+param runtimeStack string = 'Python|3.11'
 
 resource sqlServer 'Microsoft.Sql/servers@2023-05-01-preview' = {
   name: dbServerName
@@ -60,41 +60,8 @@ resource webApp 'Microsoft.Web/sites@2023-12-01' =[for i in range(1,3): {
   properties: {
     serverFarmId: appServicePlan.id
     siteConfig: {
+      pythonVersion: '3.11'
       linuxFxVersion: runtimeStack
     }
   }
 }]
-
-
-// resource sqlDatabases 'Microsoft.Sql/servers/databases@2023-05-01-preview' = {
-//   {
-//     name: 'db1'
-//     parent: sqlServer
-//     location: location
-//     properties: {
-//       collation: 'SQL_Latin1_General_CP1_CI_AS'
-//       createMode: 'Default'
-//       elasticPoolName: sqlElasticPool.name
-//     }
-//   }
-//   {
-//     name: 'db2'
-//     parent: sqlServer
-//     location: location
-//     properties: {
-//       collation: 'SQL_Latin1_General_CP1_CI_AS'
-//       createMode: 'Default'
-//       elasticPoolName: sqlElasticPool.name
-//     }
-//   }
-//   {
-//     name: 'db3'
-//     parent: sqlServer
-//     location: location
-//     properties: {
-//       collation: 'SQL_Latin1_General_CP1_CI_AS'
-//       createMode: 'Default'
-//       elasticPoolName: sqlElasticPool.name
-//     }
-//   }
-// }
