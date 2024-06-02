@@ -1,0 +1,124 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.27.1.19265",
+      "templateHash": "7517353887229428866"
+    }
+  },
+  "parameters": {
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]"
+    },
+    "administratorLoginPassword": {
+      "type": "securestring"
+    },
+    "administratorLogin": {
+      "type": "string",
+      "defaultValue": "dba"
+    },
+    "dbServerName": {
+      "type": "string",
+      "defaultValue": "sqlServer1SyskitDomagoj"
+    },
+    "dbName": {
+      "type": "string",
+      "defaultValue": "db"
+    },
+    "elasticPoolName": {
+      "type": "string",
+      "defaultValue": "elasticPool1"
+    },
+    "appServicePlanName": {
+      "type": "string",
+      "defaultValue": "appserviceplan1"
+    },
+    "appName": {
+      "type": "string",
+      "defaultValue": "webappSyskitDomagoj"
+    },
+    "runtimeStack": {
+      "type": "string",
+      "defaultValue": "PYTHON|3.10"
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Sql/servers",
+      "apiVersion": "2023-05-01-preview",
+      "name": "[parameters('dbServerName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "administratorLogin": "[parameters('administratorLogin')]",
+        "administratorLoginPassword": "[parameters('administratorLoginPassword')]",
+        "publicNetworkAccess": "Enabled",
+        "restrictOutboundNetworkAccess": "Disabled"
+      }
+    },
+    {
+      "type": "Microsoft.Sql/servers/elasticPools",
+      "apiVersion": "2023-05-01-preview",
+      "name": "[format('{0}/{1}', parameters('dbServerName'), parameters('elasticPoolName'))]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "BasicPool",
+        "capacity": 50
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Sql/servers', parameters('dbServerName'))]"
+      ]
+    },
+    {
+      "copy": {
+        "name": "sqlDatabases",
+        "count": "[length(range(1, 3))]"
+      },
+      "type": "Microsoft.Sql/servers/databases",
+      "apiVersion": "2023-05-01-preview",
+      "name": "[format('{0}/{1}', parameters('dbServerName'), format('{0}{1}', parameters('dbName'), range(1, 3)[copyIndex()]))]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "elasticPoolId": "[resourceId('Microsoft.Sql/servers/elasticPools', parameters('dbServerName'), parameters('elasticPoolName'))]",
+        "collation": "SQL_Latin1_General_CP1_CI_AS",
+        "createMode": "Default",
+        "zoneRedundant": false
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Sql/servers/elasticPools', parameters('dbServerName'), parameters('elasticPoolName'))]",
+        "[resourceId('Microsoft.Sql/servers', parameters('dbServerName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Web/serverfarms",
+      "apiVersion": "2020-06-01",
+      "name": "[parameters('appServicePlanName')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "F1"
+      },
+      "kind": "linux"
+    },
+    {
+      "copy": {
+        "name": "webApp",
+        "count": "[length(range(1, 3))]"
+      },
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2023-12-01",
+      "name": "[format('{0}{1}', parameters('appName'), range(1, 3)[copyIndex()])]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('appServicePlanName'))]",
+        "siteConfig": {
+          "linuxFxVersion": "[parameters('runtimeStack')]"
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', parameters('appServicePlanName'))]"
+      ]
+    }
+  ]
+}
