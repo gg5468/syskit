@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.27.1.19265",
-      "templateHash": "6074813433133912952"
+      "templateHash": "16046103282132378719"
     }
   },
   "parameters": {
@@ -42,7 +42,7 @@
     },
     "runtimeStack": {
       "type": "string",
-      "defaultValue": "Python|3.11"
+      "defaultValue": "python|3.11"
     }
   },
   "resources": [
@@ -99,7 +99,10 @@
       "sku": {
         "name": "F1"
       },
-      "kind": "linux"
+      "kind": "linux",
+      "properties": {
+        "reserved": true
+      }
     },
     {
       "copy": {
@@ -107,13 +110,14 @@
         "count": "[length(range(1, 3))]"
       },
       "type": "Microsoft.Web/sites",
-      "apiVersion": "2023-12-01",
+      "apiVersion": "2021-02-01",
       "name": "[format('{0}{1}', parameters('appName'), range(1, 3)[copyIndex()])]",
       "location": "[parameters('location')]",
+      "kind": "linux",
       "properties": {
         "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('appServicePlanName'))]",
+        "reserved": true,
         "siteConfig": {
-          "pythonVersion": "3.11",
           "linuxFxVersion": "[parameters('runtimeStack')]"
         }
       },
